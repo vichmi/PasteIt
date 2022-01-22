@@ -1,5 +1,8 @@
 const router = require('express').Router();
 const fs = require('fs');
+const Paste = require('../model/Paste');
+const mongoose = require('mongoose');
+const axios = require('axios');
 
 function randomString(length) {
     let string = '';
@@ -10,47 +13,55 @@ function randomString(length) {
     return string;
 }
 
-class Paste {
-    constructor(text, name, language, expiration, visability) {
-        this.text = text;
-        this.id = randomString(6);
-        this.name = name || this.id;
-        this.language = language;
-        this.expiration = expiration || 'never';
-        this.visability = visability || 'public';
+router.post('/paste', async(req, res) => {
+    try {
+        const text = req.body.text;
+        if(text == 0) res.send(400);
+        const id = randomString(6)
+        const paste = new Paste({text, id, name: req.body.name || id , language: req.body.language, expiration: req.body.expiration || 'Never', visability: req.body.visability || 'Public'})
+
+        await paste.save();
+
+        if(req.body.token) {
+            axios.post('http://localhost:3002/auth/appendUser?token='+req.body.token, {paste}, (err, response, body) => {
+                if(!err && response.statusCode == 200) {
+                    
+                }
+            });
+        }
+
+        return res.send(paste);
+    } catch(err) {
+        return res.send(err);
     }
-}
-
-const pastes = [];
-
-router.post('/paste', (req, res) => {
-    const text = req.body.text;
-    if(text == 0) res.send(400)
-    const paste = new Paste(text)
-    pastes.push(paste);
-    res.send(paste);
 });
 
-router.get('/paste/:id', (req, res) => {
-    const id = req.params.id;
-    for(let paste of pastes) {
-        if(paste.id == id) {
-            return res.send(paste);
+router.get('/paste/:id', async(req, res) => {
+    try {
+        const id = req.params.id;
+
+        const paste = await Paste.findOne({id: id})
+
+        if(paste) {
+            return res.send(paste)
         }
-    }   
-    return res.send(404);
+
+        return res.send(404);
+    }catch(err) {
+        console.log(err);
+        return res.send(err);
+    }
 });
 
-router.post('/paste/:id/download', (req, res) => {
-    const id = req.params.id;
-    for(let paste of pastes) {
-        if(paste.id == id) {
-            console.log('made quest')
-            fs.writeFile('last.txt', paste.text, (err) => {if(err) {throw err}});
-            return res.download('last.txt', 'last.txt');
-        }
-    }  
-    return res.send(404);
-});
+router.get('/allPastes', async(req, res) => {
+    try{
+        const pastes = await Paste.find({visability: 'Public'}).limit(20);
+        
+        return res.json(pastes);
+    }catch(err){
+        console.log(err);
+        return res.send(err);
+    }
+})
 
 module.exports = router;
