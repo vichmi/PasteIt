@@ -22,7 +22,7 @@ router.post('/register', async(req, res) => {
             username, password
         });
         const savedUser = await user.save();
-        console.log(savedUser);
+        // console.log(savedUser);
 
         const token = jwt.sign({username}, 'carrot');
 
@@ -38,7 +38,7 @@ router.post('/register', async(req, res) => {
 router.post('/login', async(req, res) => {
     try {
         const {username, password} = req.body;
-        console.log(username, password)
+        // console.log(username, password)
 
         if(!username || !password) {
             return res.send(400);
@@ -51,7 +51,7 @@ router.post('/login', async(req, res) => {
         }
 
         const savedUser = await user.save();
-        console.log(savedUser);
+        // console.log(savedUser);
 
         const token = jwt.sign({username}, 'carrot');
 
@@ -65,6 +65,7 @@ router.post('/login', async(req, res) => {
 
 router.get('/verifyToken', (req, res) => {
     const token = req.query.token;
+    if(req.query.token == null) return res.send('unauthenticated');
     jwt.verify(token, 'carrot', function(err, decoded){
         if(!err){
             res.json(decoded);
@@ -92,8 +93,6 @@ router.post('/appendUser', async(req, res) => {
 
             user.pastes.push(paste);
             await user.save();
-
-            console.log(user);
         }
     
     

@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import { Navbar, Container, Nav } from 'react-bootstrap';
+import { Navbar, Container, Nav, NavDropdown } from 'react-bootstrap';
 import {useLocation} from "react-router-dom";
 import axios from '../utils/axios';
 import token from '../utils/authenticated';
+import profileImage from '../images/profile.jpg';
 
 export default function NavBar() {
 
@@ -10,9 +11,13 @@ export default function NavBar() {
     const [jwtToken, setJwtToken] = useState({});
     
     useEffect(() => {
+        if(token == null) {
+            return setIsLoged(false);
+        }
         if(token) {
             axios.get('/auth/verifyToken?token='+token)
             .then(res => {
+                if(res.data == 'Unauthorized') return setIsLoged(false);
                 if(res.status == 200) {
                     setJwtToken(res.data);
                     setIsLoged(true);
@@ -45,7 +50,17 @@ export default function NavBar() {
                             <Nav.Link href="/register">Register</Nav.Link>
                         </> : 
                         <>
-                            <Navbar.Text>Signed in as: <a href='/profile'>{jwtToken.username}</a></Navbar.Text>
+                            <Navbar.Text>{jwtToken.username}</Navbar.Text>
+                            <NavDropdown title={<img src={profileImage} width='30' height='30' />} id="navbarScrollingDropdown">
+                                <NavDropdown.Item href="#action3">Stats</NavDropdown.Item>
+                                <NavDropdown.Item href="#action4">Profile Settings</NavDropdown.Item>
+                                <NavDropdown.Divider />
+                                <NavDropdown.Item onClick={() => {
+                                    localStorage.removeItem('jwt');
+                                    setIsLoged(false);
+                                    window.location.reload(false);
+                                }}>Logout</NavDropdown.Item>
+                            </NavDropdown>
                         </>
                     }
                 </Nav>

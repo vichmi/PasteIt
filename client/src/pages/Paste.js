@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import axios from '../utils/axios';
-import {Container, Button} from 'react-bootstrap';
+import {Container, Button, Row, Col} from 'react-bootstrap';
+import profileIMage from '../images/profile.jpg';
+// import { ArrowRight } from 'react-bootstrap-icons';
 
 
 export default function Paste({match}) {
@@ -22,10 +24,16 @@ export default function Paste({match}) {
     }, []);
 
   return !loading ? <div>
-      <Container className='text-center mt-3'>
-        <h2>Paste: {data.name}</h2>
-        <p>Expiring in: {data.expiration}</p>
-        <p>Visible for: {data.visability}</p>
+      <Container className='mt-3 d-flex flex-column'>
+        <Container className='d-flex flex-row'>
+            <img src={profileIMage} width={50} height={50} />
+            <p className='p-2'>{data.name}</p>
+        </Container>
+
+        <Container className='d-flex flex-row'>
+            <p className='p-2'>Expiring in: {data.expiration}</p>
+            <p className='p-2'>Visible for: {data.visability}</p>
+        </Container>
       </Container>
       <Container className='mt-1'>
         <Button variant='secondary' className='btn-sm' onClick={() => {

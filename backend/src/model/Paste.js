@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const PasteSchema = new Schema({
     text: String,
     id: String,
+    createdAt: Date,
     name: String,
     language: String,
     expiration: String,

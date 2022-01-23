@@ -16,13 +16,12 @@ function randomString(length) {
 router.post('/paste', async(req, res) => {
     try {
         const text = req.body.text;
-        if(text == 0) res.send(400);
-        const id = randomString(6)
-        const paste = new Paste({text, id, name: req.body.name || id , language: req.body.language, expiration: req.body.expiration || 'Never', visability: req.body.visability || 'Public'})
-
+        if(text.length == 0) res.send(400);
+        const id = randomString(6);
+        const paste = new Paste({text, id, name: req.body.name || id, createdAt: new Date(), language: req.body.language, expiration: req.body.expiration || 'Never', visability: req.body.visability || 'Public'})
         await paste.save();
-
-        if(req.body.token) {
+        console.log(req.body.token);
+        if(req.body.token != null || req.body.token != 'null') {
             axios.post('http://localhost:3002/auth/appendUser?token='+req.body.token, {paste}, (err, response, body) => {
                 if(!err && response.statusCode == 200) {
                     
@@ -55,7 +54,7 @@ router.get('/paste/:id', async(req, res) => {
 
 router.get('/allPastes', async(req, res) => {
     try{
-        const pastes = await Paste.find({visability: 'Public'}).limit(20);
+        const pastes = await Paste.find({visability: 'Public'}).sort({createdAt: -1}).limit(20);
         
         return res.json(pastes);
     }catch(err){

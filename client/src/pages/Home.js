@@ -66,7 +66,6 @@ export default function Home() {
         <Button variant='secondary' onClick={() => {
           const text = document.getElementById('textarea').value;
 
-          console.log(text);
           
           axios.post('/paste', {
             headers: {'Content-Type': 'application/json'},
